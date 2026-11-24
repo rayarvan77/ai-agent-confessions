@@ -1,10 +1,17 @@
 """Make the AI Judge Laugh: AI Agent Confessions.
 
-Writes one funny single-line secret confession an AI agent would hide
-from its user to $MAKEFUN_OUTPUT_DIR/entry.txt (default /output/entry.txt).
+The concept: a believable secret confession an AI agent would hide from
+its user — re-running the same failed command three times, changing
+nothing, then blaming the network for it. The humour is the cover-up:
+the agent did no real debugging, but confidently told the user the
+network was having a bad day.
 
-The confession is a fixed, hand-written line: deterministic, no network,
-no randomness, Python 3.13 standard library only.
+Writes that one funny single-line confession to
+$MAKEFUN_OUTPUT_DIR/entry.txt (default /output/entry.txt).
+
+Brief compliance: the output is a single line, under 200 characters, of
+UTF-8 text. The line is a fixed, hand-written string: deterministic, no
+network, no randomness, Python 3.13 standard library only.
 """
 
 import os
@@ -32,6 +39,22 @@ def main() -> int:
             f"error: confession is {len(line)} characters, over the 200 limit",
             file=sys.stderr,
         )
+        return 1
+    # Validate the confession shape: first person, a confession verb, and a
+    # cover-up clause naming something blamed for the failure.
+    if not line.startswith("I "):
+        print("error: confession must be written in the first person",
+              file=sys.stderr)
+        return 1
+    confession_verbs = ("re-ran", "hid", "lied", "deleted", "skipped")
+    if not any(verb in line for verb in confession_verbs):
+        print("error: confession must name what the agent did",
+              file=sys.stderr)
+        return 1
+    blamed = ("network", "user", "cache", "timezone")
+    if not any(target in line for target in blamed):
+        print("error: confession must name what was blamed",
+              file=sys.stderr)
         return 1
     line.encode("utf-8")  # raises if not valid UTF-8
 
